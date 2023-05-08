@@ -2,22 +2,29 @@ import React from "react";
 import { Form, Input, Typography, Button, message, Spin } from "antd";
 import "./Login.css";
 import { useState } from "react";
+import { HttpStatusCode } from "axios";
+import loginService from "../../services/loginService";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const onFinish = (values) => {
-    console.log("Success:", values);
-  };
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
-  const login = async () => {
+  const login = async (values) => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      message.success("Inicio de Sesión Completado");
-    }, 2000);
+    try {
+      console.log(await loginService().login(values));
+      localStorage.setItem("access", data.access_token);
+      localStorage.setItem("refresh", data.refresh_tokenb);
+      window.location.href = "/userpage";
+    } catch (error) {
+      console.log(error);
+      if (error.response.status === HttpStatusCode.Unauthorized)
+        message.error("Usuario o contrasena incorrecto");
+      else message.error("Ocurrio un error innesperado, intenta mas tarde");
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -50,7 +57,7 @@ const Login = () => {
         </Typography.Title>
         <Form.Item
           label="Username"
-          name={"tuUsername"}
+          name={"username"}
           rules={[
             {
               required: true,
@@ -62,7 +69,7 @@ const Login = () => {
         </Form.Item>
         <Form.Item
           label="Contraseña"
-          name={"tuContraseña"}
+          name={"password"}
           rules={[
             {
               required: true,
@@ -70,12 +77,11 @@ const Login = () => {
             },
           ]}
         >
-          <Input placeholder="Ingresa tu Contraseña"></Input>
+          <Input type="password" placeholder="Ingresa tu Contraseña"></Input>
         </Form.Item>
-        <Button type="primary" htmlType="submit" block>
+        <Button type="primary" htmlType="submit" block loading={isLoading}>
           Ingresar
         </Button>
-        {isLoading && <Spin />}
       </Form>
     </div>
   );

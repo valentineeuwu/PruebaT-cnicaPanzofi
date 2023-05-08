@@ -9,6 +9,7 @@ import {
 import LoginPage from "./pages/LoginPage.jsx";
 import UserPage from "./pages/UserPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+
 const router = createBrowserRouter([
   {
     path: "/login",
