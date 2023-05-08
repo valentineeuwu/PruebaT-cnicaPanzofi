@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,900;1,100;1,200;1,300;1,400;1,500;1,700;1,800;1,900&display=swap");
+
+.appBg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url(./images/img1.jpeg);
+
+  background-size: cover;
+}
+
+body {
+  margin: 0;
+}
+
+.userPage {
+  background-image: linear-gradient(
+    to left bottom,
+    #63778b,
+    #667b90,
+    #697f96,
+    #6c849b,
+    #6f88a1,
+    #7990a9,
+    #8499b1,
+    #8ea1b9,
+    #a2b0c5,
+    #b5bfd1,
+    #c8cfde,
+    #dbdfea
+  );
+  height: 100vh;
+}
