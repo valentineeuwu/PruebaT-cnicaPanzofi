@@ -1,12 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Form, Input, Typography, Button, message, Spin } from "antd";
 import "./Login.css";
 import { useState } from "react";
-import { HttpStatusCode } from "axios";
 import loginService from "../../services/loginService";
+import userService from "../../services/userService";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/store";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUserState] = useState(null);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (user) {
+      dispatch(setUser(user));
+      if (user.is_admin) navigate("/adminpage");
+      else navigate("/userpage");
+      return;
+    }
+    const token = localStorage.getItem("access");
+    if (token) localStorage.clear();
+  }, [user]);
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
@@ -14,17 +31,22 @@ const Login = () => {
   const login = async (values) => {
     setIsLoading(true);
     try {
-      console.log(await loginService().login(values));
-      localStorage.setItem("access", data.access_token);
-      localStorage.setItem("refresh", data.refresh_tokenb);
-      window.location.href = "/userpage";
+      const isLogged = await loginService().login(values);
+      if (!isLogged) {
+        setIsLoading(false);
+        message.error("Usuario o contraseña incorrecto");
+        return;
+      }
+      await loadUserInfo();
     } catch (error) {
       console.log(error);
-      if (error.response.status === HttpStatusCode.Unauthorized)
-        message.error("Usuario o contrasena incorrecto");
-      else message.error("Ocurrio un error innesperado, intenta mas tarde");
+      setIsLoading(false);
+      message.error("Ocurrió un error inesperado, intenta mas tarde");
     }
-    setIsLoading(false);
+  };
+
+  const loadUserInfo = async () => {
+    setUserState((await userService().getUser()).user);
   };
 
   return (

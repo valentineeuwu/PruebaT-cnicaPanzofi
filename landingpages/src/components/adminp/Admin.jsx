@@ -1,6 +1,8 @@
 import { Space, Table, Typography, Col, Row, Progress } from "antd";
 import "./Admin.css";
-
+import { useEffect, useState } from "react";
+import adminService from "../../services/adminService";
+import { useNavigate } from "react-router-dom";
 const columns = [
   {
     title: "Nombre",
@@ -29,67 +31,74 @@ const columns = [
     dataIndex: "boton2",
   },
 ];
-const data = [
-  {
-    key: "1",
-    nombre: "John Brown",
-    iniciodesesion: "fsd",
-    tiempo: "New York No. 1 Lake Park",
-    boton1: "efs",
-    boton2: "wiwiw",
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park",
-    tags: ["loser"],
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-    tags: ["cool", "teacher"],
-  },
-];
-const App = () => (
-  <div className="adminp">
-    <Row>
-      <Col xs={2} sm={4} md={6} lg={8} xl={10}></Col>
-      <Col xs={40} sm={26} md={32} lg={28} xl={24}>
-        <Typography.Title
-          style={{ fontFamily: "Montserrat", fontSize: "22px" }}
-        >
-          Dashboard
-        </Typography.Title>
-      </Col>
-      <Col xs={2} sm={4} md={6} lg={8} xl={10}></Col>
-    </Row>
 
-    <div className="tablee">
-      <Table
-        columns={columns}
-        dataSource={data}
-        style={{ backgroundColor: "#5F7B86", boxShadow: "2px 2px 6px rgba(0,0,0,0.3)", borderRadius:16}}
-        
-      />
-    <div className="progreso">
-    <Row>
-    <Col span={18} push={6}>
-    <Progress percent={30}  strokeColor='#3F4756' trailColor="#99ACCF"/>
-    <Progress percent={50} status="active" strokeColor='#3F4756' trailColor="#99ACCF" />
-    <Progress percent={70} status="exception" strokeColor='#3F4756' trailColor="#99ACCF"/>
-    <Progress percent={100} strokeColor='#3F4756' trailColor="#99ACCF"/>
-    <Progress percent={50} showInfo={false} strokeColor='#3F4756' trailColor="#99ACCF" />
-    </Col>
-    <Col span={6} pull={18}>
-    <Progress type="circle" percent={75}  strokeColor='#3F4756' trailColor="#99ACCF"/>
-    </Col>
-  </Row>
-    
+function formatMilliseconds(milliseconds) {
+  var seconds = Math.floor(milliseconds / 1000);
+  var hours = Math.floor(seconds / 3600);
+  var minutes = Math.floor((seconds % 3600) / 60);
+  var remainingSeconds = seconds % 60;
+
+  // Agrega ceros iniciales si es necesario
+  var formattedHours = hours < 10 ? "0" + hours : hours;
+  var formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+  var formattedSeconds =
+    remainingSeconds < 10 ? "0" + remainingSeconds : remainingSeconds;
+
+  return formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
+}
+
+const App = () => {
+  const navigate = useNavigate();
+  const [sessions, setSessions] = useState([]);
+  const [dataLoaded, setLoaded] = useState(false);
+  const getSessions = async () => {
+    const data = await adminService().getSession();
+    setSessions(
+      data?.sessions.map((session) => ({
+        nombre: session.user.username,
+        iniciodesesion: session.loggedAt,
+        tiempo: formatMilliseconds(
+          new Date(session.loggedOut).getTime() -
+            +new Date(session.loggedAt).getTime()
+        ),
+        boton1: session.button1,
+        boton2: session.button2,
+      }))
+    );
+    if (!data) navigate("../login");
+  };
+  useEffect(() => {
+    if (!dataLoaded) {
+      getSessions();
+      setLoaded(true);
+    }
+  });
+  return (
+    <div className="adminp">
+      <Row>
+        <Col xs={2} sm={4} md={6} lg={8} xl={10}></Col>
+        <Col xs={40} sm={26} md={32} lg={28} xl={24}>
+          <Typography.Title
+            style={{ fontFamily: "Montserrat", fontSize: "22px" }}
+          >
+            Dashboard
+          </Typography.Title>
+        </Col>
+        <Col xs={2} sm={4} md={6} lg={8} xl={10}></Col>
+      </Row>
+
+      <div className="tablee">
+        <Table
+          columns={columns}
+          dataSource={sessions}
+          style={{
+            backgroundColor: "#5F7B86",
+            boxShadow: "2px 2px 6px rgba(0,0,0,0.3)",
+            borderRadius: 16,
+          }}
+        />
+      </div>
     </div>
-    </div>
-  </div>
-);
+  );
+};
 export default App;

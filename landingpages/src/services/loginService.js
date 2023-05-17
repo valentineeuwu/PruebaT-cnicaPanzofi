@@ -8,21 +8,21 @@ export default () => {
         username,
         password,
       });
-      return data;
+      localStorage.setItem("access", data.access_token);
+      localStorage.setItem("refresh", data.refresh_token);
+      return true;
     } catch (error) {
-      return error;
+      if (error.response?.status === HttpStatusCode.Unauthorized) return false;
+      throw error;
     }
   };
 
-  const refreshToken = async ({ refresh }) => {
-    try {
-      const { data } = await axios.post(`${BASE_URL}/token/refresh`, {
-        refresh,
-      });
-      return data;
-    } catch (error) {
-      return error;
-    }
+  const refreshToken = async () => {
+    const refresh = localStorage.getItem("refresh");
+    const { data } = await axios.post(`${BASE_URL}/token/refresh`, {
+      refresh,
+    });
+    localStorage.setItem("access", data.access);
   };
   return { login, refreshToken };
 };
